@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envio</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<style>
+  :root {
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+    body{
+        font-family: 'inter', sans-serif;
+        padding: 20px;
+        margin: 0;
+      
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(-45deg, #2b1055, #7597de, #23d5ab, #e73c7e);
+        background-size: 400% 400%;
+        animation: gradientMove 15s ease infinite; 
+     
+        margin: 0;
+    }
+    
+    @keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+.container {
+            max-width: 480px;
+            width: 90%;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 500px; /* Un poco más ancho para que quepa la tabla */
+        }
+        h2, h3 { 
+            color: #333; 
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #e9ecef;
+            cursor: pointer;
+        }
+        .btn-enviar { width: 100%; margin-top: 20px; }
+
+</style>
+
+
+</head>
+<body>
+
+
+  <div class="container">
+        <h2 class="text-center">Enviar Dinero</h2>
+        <hr>
+        <form class="mb-4">
+            <label for="searchContact"><strong>Buscar contacto</strong></label>
+            <div class="row">
+                <div class="col-9">
+                    
+                <input type="text" class="form-control" id="Contact" placeholder="Ingrese un nombre.">
+
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-info btn-block">Buscar</button>
+                </div>
+            </div>
+        </form>
+             <button type="submit" id="boton"  class="btn btn-primary">seleccionar</button>
+        <hr>
+
+        <div class="bg-light p-3 rounded mb-4 border">
+        <label><strong>Monto a enviar</strong></label>
+        <input type="number" class="form-control" id="montoEnviar" placeholder="$0">
+        <small class="text-muted">Saldo actual: $<span id="displaySaldo">0</span></small>
+    </div>
+
+            <h3>Contactos</h3>
+
+           <div class="table-responsive">
+                <table class="table table-hover border">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Seleccionar</th>
+                            <th>Nombre</th>
+                            <th>Datos</th>
+                        </tr>
+                    </thead>                
+            <tbody>
+                <tr>
+                    <td><input type="radio" name="contact"></td>
+                        <td><strong> Maria Pineda</strong></td>
+                        <td><small>cta:0102010 | Alias: mariapr</small></td>
+                </tr>
+                <tr>
+                    <td><input type="radio" name="contact"></td>
+                        <td><strong> Elizabeth rojas</strong></td>
+                        <td><small>cta:02021010 | Alias: Elii</small></td>
+                </tr>
+            </tbody>
+            </table>
+            </div>
+
+            <div class="mt-4">
+                <button id="btn-envio" class="btn btn-success btn-enviar">Confirmar envio</button>
+                <button id="btn-contact" class="btn btn-outline-primary btn-block mt-2" data-bs-toggle="modal" data-bs-target="#modalNuevo">Agregar nuevo contacto</button>
+             </div>
+                
+     <nav class="mt-4 text-center">
+                 <a href="./menu.html" class="btn btn-secondary">Volver al menu principal</a>
+       </nav> 
+
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo Contacto</h5>
+      </div>
+      <div class="modal-body">
+        <form id="formContacto">
+            <input type="text" id="nombre" class="form-control mb-2" placeholder="Nombre" required>
+            <input type="text" id="alias" class="form-control mb-2" placeholder="Alias" required>
+            <input type="text" id="cbu" class="form-control mb-2" placeholder="CBU" required>
+            
+            <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function() {
+
+    let saldoActual = parseFloat(localStorage.getItem('saldo')) || 1000;
+    $('#displaySaldo').text(saldoActual.toFixed(2));
+
+    $('#btn-envio').hide(); 
+    $(document).on('change', 'input[name="contact"]', function() {
+        if ($(this).is(':checked')) {
+            $('#btn-envio').fadeIn();
+
+            $('tr').removeClass('table-primary');
+            $(this).closest('tr').addClass('table-primary');
+        }
+    });
+
+    $('#Contact').on('keyup', function() {
+        let valorBusqueda = $(this).val().toLowerCase();
+        $("table tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valorBusqueda) > -1);
+        });
+    });
+
+    $('#formContacto').submit(function(event) {
+        event.preventDefault();
+        
+        const nom = $('#nombre').val().trim();
+        const ali = $('#alias').val().trim();
+        const cbu = $('#cbu').val().trim();
+
+        if (nom === "" || ali === "" || cbu === "") {
+            alert("Todos los campos son obligatorios");
+            return;
+        }
+        if (isNaN(cbu) || cbu.length < 8) {
+            alert("El CBU debe ser un número válido (mínimo 8 dígitos)");
+            return;
+        }
+
+        const nuevaFila = `
+            <tr>
+                <td><input type="radio" name="contact"></td>
+                <td><strong>${nom}</strong></td>
+                <td><small>cta:${cbu} | Alias: ${ali}</small></td>
+            </tr>
+        `;
+        
+        $('table tbody').append(nuevaFila);
+        
+        const modalElement = document.getElementById('modalNuevo');
+        const modalInstancia = bootstrap.Modal.getInstance(modalElement);
+        modalInstancia.hide();
+        
+        this.reset();
+        alert("Contacto guardado exitosamente");
+    });
+
+    $('#btn-envio').click(function() {
+        const monto = parseFloat($('#montoEnviar').val());
+        const contactoSeleccionado = $('input[name="contact"]:checked').closest('tr').find('td:nth-child(2)').text();
+
+        if (isNaN(monto) || monto <= 0) {
+            alert("Ingrese un monto válido");
+            return;
+        }
+
+        if (monto > saldoActual) {
+            alert("Saldo insuficiente");
+            return;
+        }
+
+        saldoActual -= monto;
+        localStorage.setItem('saldo', saldoActual);
+        $('#displaySaldo').text(saldoActual.toFixed(2));
+
+        $('.container').append(`
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                <strong>¡Envío realizado!</strong> Se han enviado $${monto} a ${contactoSeleccionado}.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `);
+
+        $('#montoEnviar').val("");
+        $('#btn-envio').fadeOut();
+        $('input[name="contact"]').prop('checked', false);
+        $('tr').removeClass('table-primary');
+    });
+});
+</script>
+</body>
+
+</html>
